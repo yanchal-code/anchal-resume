@@ -1,0 +1,6 @@
+{
+  "name": "Resume Tailor",
+  "description": "AI-powered resume tailoring with match score analysis, job keyword detection, and detailed side-by-side wording diffs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

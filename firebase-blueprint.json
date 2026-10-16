@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "ResumeVersion": {
+      "title": "ResumeVersion",
+      "description": "A saved tailored resume version for a target job application",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique version document ID"
+        },
+        "userId": {
+          "type": "string",
+          "description": "UID of the owner user"
+        },
+        "company": {
+          "type": "string",
+          "description": "Name of the target employer or organization",
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "description": "Target job title",
+          "maxLength": 128
+        },
+        "status": {
+          "type": "string",
+          "description": "Application status",
+          "enum": ["Draft", "Applied", "Interview", "Offer", "Rejected"]
+        },
+        "date": {
+          "type": "string",
+          "description": "Human-readable creation or updated date"
+        },
+        "beforeScore": {
+          "type": "number",
+          "description": "Baseline match score 0-100"
+        },
+        "afterScore": {
+          "type": "number",
+          "description": "Tailored match score 0-100"
+        },
+        "resume": {
+          "type": "string",
+          "description": "Original candidate resume text",
+          "maxLength": 50000
+        },
+        "jobDescription": {
+          "type": "string",
+          "description": "Target job posting description text",
+          "maxLength": 50000
+        },
+        "tailoredResume": {
+          "type": "string",
+          "description": "Full rewritten resume content",
+          "maxLength": 50000
+        },
+        "tailoredSummary": {
+          "type": "string",
+          "description": "Executive transformation summary",
+          "maxLength": 2000
+        },
+        "scoreAnalysis": {
+          "type": "string",
+          "description": "Analysis of the score and fit",
+          "maxLength": 3000
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp ISO string or server timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last update timestamp ISO string or server timestamp"
+        }
+      },
+      "required": ["userId", "company", "role", "status", "beforeScore", "afterScore", "tailoredResume"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/versions/{versionId}": {
+      "schema": "ResumeVersion",
+      "description": "Saved resume tailoring records owned privately by the authenticated user"
+    }
+  }
+}

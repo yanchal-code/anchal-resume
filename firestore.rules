@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidStatus(status) {
+      return status in ['Draft', 'Applied', 'Interview', 'Offer', 'Rejected'];
+    }
+
+    function isValidResumeVersion(data, userId) {
+      return data.userId == userId
+        && data.userId == request.auth.uid
+        && data.company is string && data.company.size() > 0 && data.company.size() <= 128
+        && data.role is string && data.role.size() > 0 && data.role.size() <= 128
+        && isValidStatus(data.status)
+        && data.beforeScore is number && data.beforeScore >= 0 && data.beforeScore <= 100
+        && data.afterScore is number && data.afterScore >= 0 && data.afterScore <= 100
+        && data.tailoredResume is string && data.tailoredResume.size() <= 50000;
+    }
+
+    // User tailored resume versions
+    // Users can only read and modify their own records
+    match /users/{userId}/versions/{versionId} {
+      allow get: if isSignedIn()
+        && request.auth.uid == userId
+        && isValidId(userId)
+        && isValidId(versionId);
+
+      allow list: if isSignedIn()
+        && request.auth.uid == userId;
+
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && isValidId(userId)
+        && isValidId(versionId)
+        && isValidResumeVersion(incoming(), userId);
+
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && isValidId(userId)
+        && isValidId(versionId)
+        && incoming().userId == existing().userId
+        && isValidStatus(incoming().status);
+
+      allow delete: if isSignedIn()
+        && request.auth.uid == userId
+        && isValidId(userId)
+        && isValidId(versionId);
+    }
+  }
+}
